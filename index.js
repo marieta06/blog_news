@@ -1,15 +1,20 @@
 const Koa = require("koa");
 const config = require('./src/config/config');
-
 const app = new Koa();
 const PORT = config.PORT;
 
 
-app.use(async (ctx) => {
-    ctx.body = "Hello world!!!";
-});
+const sequelize = require('./src/db/seeders/connection');
 
-app.listen(PORT);
-
-console.log(`Server listening on port:${PORT}`);
-
+const start = async () => {
+    try {
+        app.listen(PORT, () => {
+            console.log(`Server listening on port: ${PORT}`);
+        });
+        await sequelize.authenticate();
+        console.log('Database successfully connected');
+    } catch (error) {
+        console.log('Unable to connect to the database ', error.message);
+    }
+};
+start();
