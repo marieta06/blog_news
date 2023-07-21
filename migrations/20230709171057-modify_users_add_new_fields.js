@@ -13,7 +13,7 @@ module.exports = {
         ]);
     },
 
-    down(queryInterface) {
+    down(queryInterface, Sequelize) {
         return Promise.all([
             queryInterface.removeColumn('users', 'isValid')
         ]);
