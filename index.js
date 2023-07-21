@@ -1,8 +1,8 @@
 const Koa = require("koa");
 const config = require('./src/config/config');
 const sequelize = require('./src/db/seeders/connection');
-const router = require('./src/routes/index')
-const { koaBody } = require('koa-body');
+const router = require('./src/routes/index');
+const {koaBody} = require('koa-body');
 
 const app = new Koa();
 const PORT = config.PORT;
@@ -21,6 +21,7 @@ const start = async () => {
         console.log('Unable to connect to the database ', error.message);
     }
 };
+
 start();
 
 

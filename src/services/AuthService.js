@@ -9,12 +9,15 @@ class AuthService {
         if (isExistUser) {
             throw new Error(`User with this ${email} already exist`);
         }
+
         const hashedPassword = await encrypt(password);
+
         const user = await User.create({
             fullName,
             email,
             password: hashedPassword
         });
+
         delete user.dataValues.password;
         return user.dataValues;
     }
@@ -26,10 +29,11 @@ class AuthService {
             throw new Error('User not found');
         }
 
-        const isMatch = await compare(user.password, password);
+        const isMatch = await compare(password, user.password);
 
         if (!isMatch) throw new Error('invalid credentials');
-        return user;
+
+        return user.dataValues;
     }
 
     async #findUserByEmail(email) {
@@ -44,8 +48,44 @@ class AuthService {
     }
 
     verifyToken(token) {
-        const {payload} = verify(token, process.env.JWT_SECRET);
-        return payload;
+        const {id, email} = verify(token, process.env.JWT_SECRET);
+        return {
+            id,
+            email
+        };
+    }
+
+    async verify(id, currentPassword) {
+
+        const user = await User.findOne({
+            where: {id}
+        });
+
+        const {password} = user;
+        const isMatch = await compare(currentPassword, password);
+
+        if (isMatch) {
+            user.isValid = true;
+            await user.save();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    async reset(newPassword, confirmPassword, id) {
+        const user = await User.findOne({
+            where: {id}
+        });
+
+        if (confirmPassword !== newPassword) {
+            throw new Error('Passwords do not match');
+            return;
+        }
+
+        user.password = await encrypt(newPassword);
+        await user.save();
     }
 }
 
